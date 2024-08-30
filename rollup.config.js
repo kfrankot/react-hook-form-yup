@@ -1,6 +1,8 @@
 import { babel } from '@rollup/plugin-babel'
 import includePaths from 'rollup-plugin-includepaths'
 import license from 'rollup-plugin-license'
+import resolve from '@rollup/plugin-node-resolve'
+import commonjs from '@rollup/plugin-commonjs'
 import terser from '@rollup/plugin-terser'
 
 const banner = `
@@ -21,7 +23,15 @@ export default [
         format: 'esm',
       },
     ],
-    external: ['react', 'yup', 'yup-field-props-react'],
+    external: [
+      'react',
+      'yup',
+      'react-hook-form',
+      '@hookform/resolvers/yup',
+      'yup-field-props-react',
+      'flat',
+      '@radix-ui/react-use-callback-ref',
+    ],
     plugins: [
       license({
         banner,
@@ -29,6 +39,8 @@ export default [
       includePaths({
         extensions: ['.ts', '.tsx', '.js', '.jsx'],
       }),
+      resolve(),
+      commonjs(),
       babel({
         babelHelpers: 'runtime',
         exclude: 'node_modules/**',
