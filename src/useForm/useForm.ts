@@ -14,13 +14,8 @@ export type UseFormProps<
   TContext extends AnyObject = AnyObject,
 > = Omit<UseFormPropsRhf<TFieldValues, TContext>, 'resolver' | 'context'> & {
   schema: ObjectSchema<TFieldValues, TContext>
-  schemaOptions?: Parameters<
-    ObjectSchema<TFieldValues, TContext>['validate']
-  >[1]
-  resolverOptions?: {
-    mode?: 'async' | 'sync'
-    raw?: boolean
-  }
+  schemaOptions?: Parameters<typeof yupResolver<TFieldValues>>[1]
+  resolverOptions?: Parameters<typeof yupResolver<TFieldValues>>[2]
   context?: TContext | (() => TContext)
 }
 
