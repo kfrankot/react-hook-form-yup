@@ -10,7 +10,7 @@ export type Configs = {
 }
 
 export type ConfigsProviderProps = Pick<
-  Configs,
+  Partial<Configs>,
   'schemaSyncMode' | 'disableValidateOnSchemaSync'
 > & {
   children?: ReactNode
@@ -23,7 +23,7 @@ export const ConfigsContext = createContext<Configs>({
 })
 
 export const ConfigsProvider = ({
-  schemaSyncMode,
+  schemaSyncMode = 'onBlur',
   disableValidateOnSchemaSync = false,
   children,
 }: ConfigsProviderProps) => {

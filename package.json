@@ -66,6 +66,7 @@
     "@rollup/plugin-terser": "^0.4.4",
     "@testing-library/jest-dom": "^6.4.8",
     "@testing-library/react": "^16.0.0",
+    "@types/flat": "^5.0.5",
     "@types/jest": "^29.5.12",
     "@types/react": "^18.3.3",
     "@typescript-eslint/eslint-plugin": "^7.15.0",
@@ -89,7 +90,7 @@
   },
   "dependencies": {
     "@radix-ui/react-use-callback-ref": "^1.1.0",
-    "flat": "^6.0.1",
+    "flat": "^5.0.2",
     "yup-field-props-react": "1.0.0-beta.2"
   },
   "peerDependencies": {

@@ -7,7 +7,7 @@ export default {
   },
   testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.[jt]sx?$',
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
-  setupFilesAfterEnv: [], // Add setup for React testing library
+  setupFilesAfterEnv: ['<rootDir>/setupTests.ts'],
   testPathIgnorePatterns: ['/node_modules/', '/dist/'],
   coverageThreshold: {
     global: {
