@@ -9,7 +9,7 @@ import { SchemaProvider } from 'yup-field-props-react'
 import { ConfigsProvider, ConfigsProviderProps } from '../ConfigsProvider'
 
 export type FormProviderProps<
-  TFieldValues extends FieldValues,
+  TFieldValues extends FieldValues = FieldValues,
   TContext extends AnyObject = any,
   TTransformedValues extends FieldValues | undefined = undefined,
 > = FormProviderPropsRhf<TFieldValues, TContext, TTransformedValues> & {
