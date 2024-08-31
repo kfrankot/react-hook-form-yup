@@ -1,7 +1,7 @@
 {
   "name": "react-hook-form-yup",
   "version": "1.0.0-alpha.1",
-  "description": "A library to improve the integration between react-hook-form and yup schemas",
+  "description": "Enhances the integration of yup schemas into react-hook-form",
   "files": [
     "dist/"
   ],

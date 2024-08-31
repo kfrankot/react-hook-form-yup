@@ -1,10 +1,10 @@
 # react-hook-form-yup
 
-An extension of `react-hook-form` to improve `yup` schema integration
+Enhances the integration of `yup` schemas into `react-hook-form`.
 
 ## Description
 
-This library provides the validation schema state for a field when using the `Controller` component or `useController` hook, so that validation rules can be displayed in the UI.
+This library provides the yup schema state for a field when using the `Controller` component or `useController` hook, so that validation rules can be displayed in the UI.
 
 ## Installation
 
