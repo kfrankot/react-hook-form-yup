@@ -1,5 +1,5 @@
 import React from 'react'
-import { render, screen } from '@testing-library/react'
+import { render, screen, renderHook } from '@testing-library/react'
 import { useFormContext } from 'react-hook-form'
 import { ConfigsProvider, useConfigs, ConfigsContext } from './ConfigsProvider'
 
@@ -128,26 +128,19 @@ describe('ConfigsProvider', () => {
 
 describe('useConfigs', () => {
   it('returns context values', () => {
-    const TestComponent = () => {
-      const { schemaSyncMode, disableValidateOnSchemaSync } = useConfigs()
-      return (
-        <div>
-          <span>{schemaSyncMode}</span>
-          <span>{disableValidateOnSchemaSync.toString()}</span>
-        </div>
-      )
-    }
+    const { result } = renderHook(() => useConfigs(), {
+      wrapper: ({ children }) => (
+        <ConfigsProvider
+          schemaSyncMode="onTouched"
+          disableValidateOnSchemaSync={true}
+        >
+          {children}
+        </ConfigsProvider>
+      ),
+    })
 
-    render(
-      <ConfigsProvider
-        schemaSyncMode="onTouched"
-        disableValidateOnSchemaSync={true}
-      >
-        <TestComponent />
-      </ConfigsProvider>,
-    )
-
-    expect(screen.getByText('onTouched')).toBeInTheDocument()
-    expect(screen.getByText('true')).toBeInTheDocument()
+    expect(result.current.schemaSyncMode).toBe('onTouched')
+    expect(result.current.disableValidateOnSchemaSync).toBe(true)
+    expect(result.current.trigger).toBeInstanceOf(Function)
   })
 })

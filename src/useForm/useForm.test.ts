@@ -65,4 +65,17 @@ describe('useForm', () => {
     expect(result.current.context).toBe(context)
     expect(result.current).toMatchObject(mockFormReturn)
   })
+
+  it('should allow setting context as a function', () => {
+    const contextFn = () => null
+
+    const { result } = renderHook(() =>
+      useForm({
+        schema,
+        context: contextFn,
+      }),
+    )
+
+    expect(result.current.context).toBe(contextFn)
+  })
 })

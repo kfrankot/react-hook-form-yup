@@ -15,23 +15,40 @@ describe('FormProvider', () => {
     name: yup.string().required(),
   })
 
+  const ChildComponent = () => {
+    const { schemaSyncMode, disableValidateOnSchemaSync } =
+      React.useContext(ConfigsContext)
+    return (
+      <div>
+        <span data-testid="schema-sync-mode">{schemaSyncMode}</span>
+        <span data-testid="disable-validate-on-schema-sync">
+          {disableValidateOnSchemaSync.toString()}
+        </span>
+      </div>
+    )
+  }
+
   const FormProviderWithUseForm = ({
     schemaSyncMode,
     disableValidateOnSchemaSync,
     schema = testSchema,
     getValues,
-    children,
+    formState,
     ...props
   }: Partial<FormProviderProps<any, any>> = {}) => {
     const methods = useForm({ schema, mode: 'onSubmit', ...props })
     return (
       <FormProvider
         {...methods}
+        formState={{
+          ...methods.formState,
+          ...formState,
+        }}
         schemaSyncMode={schemaSyncMode}
         disableValidateOnSchemaSync={disableValidateOnSchemaSync}
         getValues={getValues || methods.getValues}
       >
-        {children || <div>Child Component</div>}
+        {<ChildComponent />}
       </FormProvider>
     )
   }
@@ -41,27 +58,17 @@ describe('FormProvider', () => {
   })
 
   it('passes context values to child components', () => {
-    const TestComponent = () => {
-      const { schemaSyncMode, disableValidateOnSchemaSync } =
-        React.useContext(ConfigsContext)
-      return (
-        <div>
-          <span>{schemaSyncMode}</span>
-          <span>{disableValidateOnSchemaSync.toString()}</span>
-        </div>
-      )
-    }
-
     render(
       <FormProviderWithUseForm
         schemaSyncMode="onTouched"
         disableValidateOnSchemaSync={true}
-        children={<TestComponent />}
       />,
     )
 
-    expect(screen.getByText('onTouched')).toBeInTheDocument()
-    expect(screen.getByText('true')).toBeInTheDocument()
+    expect(screen.getByTestId('schema-sync-mode').textContent).toBe('onTouched')
+    expect(
+      screen.getByTestId('disable-validate-on-schema-sync').textContent,
+    ).toBe('true')
   })
 
   it('passes correct props to SchemaProvider', () => {
@@ -76,5 +83,21 @@ describe('FormProvider', () => {
       }),
       {},
     )
+  })
+
+  it('should set correct defaults for submitCount equal to 0', () => {
+    render(<FormProviderWithUseForm formState={{ submitCount: 0 } as any} />)
+
+    expect(
+      screen.getByTestId('disable-validate-on-schema-sync').textContent,
+    ).toBe('true')
+  })
+
+  it('should set correct defaults for submitCount greater than 0', () => {
+    render(<FormProviderWithUseForm formState={{ submitCount: 1 } as any} />)
+
+    expect(
+      screen.getByTestId('disable-validate-on-schema-sync').textContent,
+    ).toBe('false')
   })
 })

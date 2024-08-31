@@ -1,5 +1,6 @@
 import React from 'react'
 import { render, act, waitFor, fireEvent } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { useForm } from '../useForm'
 import { FormProvider, FormProviderProps } from '../FormProvider'
 import { useController } from './useController'
@@ -48,7 +49,11 @@ const TestFormProvider = ({
 }
 
 const TestInput = ({ name }: { name: string }) => {
-  const { field, fieldState, schemaState } = useController({ name })
+  const {
+    field,
+    fieldState: { error },
+    schemaState,
+  } = useController({ name })
 
   return (
     <>
@@ -57,10 +62,8 @@ const TestInput = ({ name }: { name: string }) => {
         data-testid={field.name}
         required={schemaState.required}
       />
-      {fieldState.error && (
-        <span data-testid={`${field.name}-error`}>
-          {fieldState.error.message}
-        </span>
+      {error && (
+        <span data-testid={`${field.name}-error`}>{error.message}</span>
       )}
     </>
   )
@@ -188,6 +191,37 @@ describe('useController', () => {
     })
     await waitFor(() => {
       expect(getByTestId('age-error')).toBeInTheDocument()
+    })
+  })
+
+  it('updates validation state for other fields on change', async () => {
+    const user = userEvent.setup()
+    const { getByTestId, queryByTestId } = render(
+      <TestComponent
+        mode="onChange"
+        schemaSyncMode="onChange"
+        defaultValues={{ name: '', age: '18' }}
+      />,
+    )
+    const name = getByTestId('name')
+    const age = getByTestId('age')
+    // Set age field dirty so re-validate should be applied
+    await user.clear(age)
+    fireEvent.blur(age)
+    await waitFor(() => {
+      expect(queryByTestId('age-error')).not.toBeInTheDocument()
+    })
+    await user.type(name, 'John doe')
+    await waitFor(
+      () => {
+        expect(queryByTestId('age-error')).toBeInTheDocument()
+      },
+      { timeout: 5000 },
+    )
+    // trigger re-validate
+    await user.clear(name)
+    await waitFor(() => {
+      expect(queryByTestId('age-error')).not.toBeInTheDocument()
     })
   })
 

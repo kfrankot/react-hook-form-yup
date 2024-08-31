@@ -11,7 +11,7 @@ export default {
   testPathIgnorePatterns: ['/node_modules/', '/dist/'],
   coverageThreshold: {
     global: {
-      branches: 85,
+      branches: 95,
       functions: 90,
       lines: 95,
       statements: 95,
