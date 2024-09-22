@@ -1,6 +1,8 @@
 export type {
   UseControllerProps,
   UseControllerReturn,
-  GenericSchemaState,
+  SchemaStateDynamic,
+  SchemaStateDynamicByType,
+  FieldPropsDynamicByType,
 } from './useController'
 export { useController } from './useController'
