@@ -1,6 +1,6 @@
 {
   "name": "react-hook-form-yup",
-  "version": "1.0.0-alpha.3",
+  "version": "1.0.0-alpha.4",
   "description": "Enhances the integration of yup schemas into react-hook-form",
   "files": [
     "dist/"
@@ -91,7 +91,7 @@
   "dependencies": {
     "@radix-ui/react-use-callback-ref": "^1.1.0",
     "flat": "^5.0.2",
-    "yup-field-props-react": "1.0.0-beta.2",
+    "yup-field-props-react": "1.0.0-beta.3",
     "@hookform/resolvers": "^3.9.0"
   },
   "peerDependencies": {

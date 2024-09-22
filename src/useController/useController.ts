@@ -28,6 +28,8 @@ import {
   StringSchemaState,
 } from '../types'
 
+type IsAny<T> = 0 extends 1 & T ? true : false
+
 export type FieldPropsDynamicByType<T> = (Extract<T, string> extends never
   ? unknown
   : StringFieldProps) &
@@ -45,8 +47,9 @@ export type FieldPropsDynamicByType<T> = (Extract<T, string> extends never
     | Date
     | Array<unknown>
     | Record<string, unknown>
-    ? FieldProps
-    : AllFieldProps)
+    ? unknown
+    : AllFieldProps) &
+  (IsAny<T> extends true ? AllFieldProps : FieldProps)
 
 export type SchemaStateDynamicByType<T> = (Extract<T, string> extends never
   ? unknown
@@ -65,8 +68,9 @@ export type SchemaStateDynamicByType<T> = (Extract<T, string> extends never
     | Date
     | Array<unknown>
     | Record<string, unknown>
-    ? SchemaState
-    : AllSchemaState)
+    ? unknown
+    : AllSchemaState) &
+  (IsAny<T> extends true ? AllSchemaState : SchemaState)
 
 export type SchemaStateDynamic<
   TFieldValues extends FieldValues,
