@@ -95,7 +95,7 @@
     "@hookform/resolvers": "^3.9.0"
   },
   "peerDependencies": {
-    "react": "^18.0.0",
+    "react": "^16.8.0 || ^17 || ^18 || ^19",
     "react-hook-form": "^7.0.0",
     "yup": "^1.0.0"
   }

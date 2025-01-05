@@ -4,7 +4,15 @@ Enhances the integration of `yup` schemas into `react-hook-form`.
 
 ## Description
 
-This library provides the yup schema state for a field when using the `Controller` component or `useController` hook, so that validation rules can be displayed in the UI.
+This library provides the current schema validation rules as properties on `Controller` and `useController`, so that they can easily be displayed in the UI.
+
+This is managed through the following process:
+
+1. Describe the schema based on the current form values on re-renders using the current form values
+2. Iterate through the schema description to evaluate references
+3. Extract the validation rules as properties rather than a schema definition
+4. Sychronize field validation state and rule properties with conditional schema rules based on the current form values
+5. Map the schema rule properties back to the `useController` hook for use in the UI
 
 ## Installation
 
@@ -31,26 +39,35 @@ const schema = yup.object().shape({
 
 ```tsx
 import React from 'react'
-import { useForm, FormProvider, useController, NumberSchemaState } from 'react-hook-form-yup'
+import {
+  useForm,
+  FormProvider,
+  useController,
+  NumberSchemaState,
+} from 'react-hook-form-yup'
 import { schema } from './schema'
 
-const NumberInput = (props: { name: string, type: string }) => {
-  const { field, fieldState: { error }, schemaState } = useController<any, any, NumberSchemaState>(props.name)
+const NumberInput = (props: { name: string; type: string }) => {
+  const {
+    field,
+    fieldState: { error },
+    schemaState,
+  } = useController<any, any, NumberSchemaState>(props.name)
   const { required, min, max, lessThan, moreThan } = schemaState
   const minMsg = min ? `Min ${min}` : moreThan ? `More than ${moreThan}` : ''
   const maxMsg = max ? `Max ${max}` : lessThan ? `Less than ${lessThan}` : ''
   const placeholder = [minMsg, maxMsg].filter(Boolean).join(' and ')
 
   return (
-    <>
+    <div>
       <input
         {...field}
         style={{ display: 'block', width: 250 }}
         required={required}
         placeholder={placeholder}
       />
-      {error && (<p style={{ color: 'red' }}>{error.message}</p>)}
-    </p>
+      {error && <p style={{ color: 'red' }}>{error.message}</p>}
+    </div>
   )
 }
 
@@ -78,7 +95,7 @@ This library will try to keep the schema state and form validation aligned with 
 
 ### Schema sync mode
 
-Set `schemaSyncMode` to change when the schema is synced with the form values. Can be `onBlur`, `onTouched`, `onChange`, `all`, or `false` to disable. Default is `onBlur` and is recommended for good performance
+Set `schemaSyncMode` to change when the schema is synced with the form values. Can be `onBlur`, `onTouched`, `onChange`, `all`, or `false` to disable. Default is `onBlur` and is recommended for optimal performance.
 
 ```tsx
 <FormProvider schemaSyncMode="onChange" {...props} />
@@ -86,8 +103,84 @@ Set `schemaSyncMode` to change when the schema is synced with the form values. C
 
 ### Disable validate on schema sync
 
-Set `disableValidateOnSchemaSync` to disable validation from occuring on schema sync.
+Set `disableValidateOnSchemaSync` to disable validation from occuring on schema sync. This defaults to `true` if `useForm` is set with `mode` "onSubmit" and `submitCount` is 0, or with `reValidateMode` "onSubmit" and `submitCount` is greater than 0. Otherwise it defaults to `false`.
 
 ```tsx
 <FormProvider disableValidateOnSchemaSync {...props} />
+```
+
+## Advanced usage
+
+While this library provides overrides of `useForm`, `useController`, and `FormProvider` from the `react-hook-form` library, these could create too tight of a binding between `react-hook-form` and `react-hook-form-yup` for advanced use cases. For more complext setups, you can alternatively utilize the `SchemaConfigsProvider` component and `useSchemaController` hook, which are used internally the `FormProvider` and `useController` hooks.
+
+### Form setup
+
+The below example is functionaly equivalent to the previous form setup example. It is a bit more complex and easier to misconfigure, but offers some additional flexibility.
+
+```tsx
+import React from 'react'
+import { useForm, FormProvider, useController } from 'react-hook-form'
+import { SchemaConfigsProvider, useSchemaController } from 'react-hook-form-yup'
+import { yupResolver } from '@hookform/resolvers/yup'
+import { schema } from './schema'
+
+const NumberInput = (props: { name: string; type: string }) => {
+  const { field, fieldState } = useController<any, any, NumberSchemaState>(
+    props.name,
+  )
+  const { schemaState, ...schemaProps } = useSchemaController<
+    any,
+    any,
+    NumberSchemaState
+  >(props.name, fieldState)
+  const { required, min, max, lessThan, moreThan } = schemaState
+  const minMsg = min ? `Min ${min}` : moreThan ? `More than ${moreThan}` : ''
+  const maxMsg = max ? `Max ${max}` : lessThan ? `Less than ${lessThan}` : ''
+  const placeholder = [minMsg, maxMsg].filter(Boolean).join(' and ')
+
+  const onChange = (event) => {
+    field.onChange(event)
+    schemaProps.onChange()
+  }
+  const onBlur = (event) => {
+    field.onBlur(event)
+    schemaProps.onBlur()
+  }
+
+  return (
+    <div>
+      <input
+        {...field}
+        onChange={onChange}
+        onBlur={onBlur}
+        style={{ display: 'block', width: 250 }}
+        required={required}
+        placeholder={placeholder}
+      />
+      {fieldState.error && (
+        <p style={{ color: 'red' }}>{fieldState.error.message}</p>
+      )}
+    </div>
+  )
+}
+
+const MyForm = () => {
+  const resolver = React.useMemo(() => yupResolver(schema), [schema])
+  const props = useForm({ resolver })
+
+  return (
+    <FormProvider {...props}>
+      <SchemaConfigsProvider
+        schema={schema}
+        schemaSyncMode="onBlur"
+        disableValidateOnSchemaSync={false}
+      >
+        <NumberInput name="minSize" type="number" />
+        <NumberInput name="maxSize" type="number" />
+      </SchemaConfigsProvider>
+    </FormProvider>
+  )
+}
+
+export default MyForm
 ```
