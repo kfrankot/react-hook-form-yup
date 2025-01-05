@@ -7,10 +7,10 @@ import {
   useFormContext,
 } from 'react-hook-form'
 import {
-  ConfigsProvider,
-  useConfigs,
-  ConfigsContext,
-  ConfigsProviderProps,
+  SchemaConfigsProvider,
+  useSchemaConfigs,
+  SchemaConfigsContext,
+  SchemaConfigsProviderProps,
 } from './ConfigsProvider'
 import * as yup from 'yup'
 import { SchemaProvider } from 'yup-field-props-react'
@@ -32,7 +32,7 @@ const testSchema = yup.object().shape({
 
 const ChildComponent = ({ children }: { children: ReactNode }) => {
   const { schemaSyncMode, disableValidateOnSchemaSync } =
-    React.useContext(ConfigsContext)
+    React.useContext(SchemaConfigsContext)
   return (
     <div>
       <span data-testid="schema-sync-mode">{schemaSyncMode}</span>
@@ -49,17 +49,17 @@ const ConfigsProviderWithUseForm = ({
   disableValidateOnSchemaSync,
   schema = testSchema,
   ...props
-}: Partial<FormProviderProps> & Partial<ConfigsProviderProps> = {}) => {
+}: Partial<FormProviderProps> & Partial<SchemaConfigsProviderProps> = {}) => {
   const methods = useForm({ mode: 'onSubmit' })
   return (
     <FormProvider {...methods} {...props}>
-      <ConfigsProvider
+      <SchemaConfigsProvider
         schema={schema}
         schemaSyncMode={schemaSyncMode}
         disableValidateOnSchemaSync={disableValidateOnSchemaSync}
       >
         {<ChildComponent>{props.children}</ChildComponent>}
-      </ConfigsProvider>
+      </SchemaConfigsProvider>
     </FormProvider>
   )
 }
@@ -75,7 +75,7 @@ const defaultUseFormContext = () => ({
   getValues: () => ({ name: '' }),
 })
 
-describe('ConfigsProvider', () => {
+describe('SchemaConfigsProvider', () => {
   beforeEach(() => {
     mockUseFormContext.mockReturnValue(defaultUseFormContext())
   })
@@ -172,9 +172,9 @@ describe('ConfigsProvider', () => {
 
     render(
       <ConfigsProviderWithUseForm schemaSyncMode="onTouched">
-        <ConfigsContext.Consumer>
+        <SchemaConfigsContext.Consumer>
           {(value) => <button onClick={() => value.trigger()}>Trigger</button>}
-        </ConfigsContext.Consumer>
+        </SchemaConfigsContext.Consumer>
       </ConfigsProviderWithUseForm>,
     )
 
@@ -195,9 +195,9 @@ describe('ConfigsProvider', () => {
 
     render(
       <ConfigsProviderWithUseForm schemaSyncMode="onChange">
-        <ConfigsContext.Consumer>
+        <SchemaConfigsContext.Consumer>
           {(value) => <button onClick={() => value.trigger()}>Trigger</button>}
-        </ConfigsContext.Consumer>
+        </SchemaConfigsContext.Consumer>
       </ConfigsProviderWithUseForm>,
     )
 
@@ -218,9 +218,9 @@ describe('ConfigsProvider', () => {
 
     render(
       <ConfigsProviderWithUseForm schemaSyncMode="onBlur">
-        <ConfigsContext.Consumer>
+        <SchemaConfigsContext.Consumer>
           {(value) => <button onClick={() => value.trigger()}>Trigger</button>}
-        </ConfigsContext.Consumer>
+        </SchemaConfigsContext.Consumer>
       </ConfigsProviderWithUseForm>,
     )
 
@@ -229,9 +229,9 @@ describe('ConfigsProvider', () => {
   })
 })
 
-describe('useConfigs', () => {
+describe('useSchemaConfigs', () => {
   it('returns context values', () => {
-    const { result } = renderHook(() => useConfigs(), {
+    const { result } = renderHook(() => useSchemaConfigs(), {
       wrapper: ({ children }) => (
         <ConfigsProviderWithUseForm
           schemaSyncMode="onTouched"

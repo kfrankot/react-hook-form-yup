@@ -5,32 +5,32 @@ import { flatten } from 'flat'
 import { SchemaProvider } from 'yup-field-props-react'
 import { ObjectSchema } from 'yup'
 
-export type Configs = {
+export type SchemaConfigs = {
   schemaSyncMode: 'onBlur' | 'onChange' | 'onTouched' | 'all' | false
   disableValidateOnSchemaSync: boolean
   trigger: UseFormTrigger<FieldValues>
 }
 
-export type ConfigsProviderProps = Pick<
-  Partial<Configs>,
+export type SchemaConfigsProviderProps = Pick<
+  Partial<SchemaConfigs>,
   'schemaSyncMode' | 'disableValidateOnSchemaSync'
 > & {
   schema: ObjectSchema<any>
   children?: ReactNode
 }
 
-export const ConfigsContext = createContext<Configs>({
+export const SchemaConfigsContext = createContext<SchemaConfigs>({
   schemaSyncMode: false,
   disableValidateOnSchemaSync: false,
   trigger: () => Promise.resolve(false),
 })
 
-export const ConfigsProvider = ({
+export const SchemaConfigsProvider = ({
   schema,
   schemaSyncMode: schemaSyncModeProp,
   disableValidateOnSchemaSync: disableValidateOnSchemaSyncProp,
   children,
-}: ConfigsProviderProps) => {
+}: SchemaConfigsProviderProps) => {
   const formContext = useFormContext()
   const {
     formState: { submitCount },
@@ -46,6 +46,8 @@ export const ConfigsProvider = ({
   const disableValidateOnSchemaSync =
     disableValidateOnSchemaSyncProp ?? currentMode === 'onSubmit'
 
+  // Allow re-triggering validation on fields which should have already been validated once
+  // based on given configurations, to allow syncing with potentially conditional schema
   const trigger = useCallbackRef(() => {
     const validateDirty =
       schemaSyncMode === 'all' ||
@@ -87,7 +89,7 @@ export const ConfigsProvider = ({
     [schemaSyncMode, disableValidateOnSchemaSync, trigger],
   )
   return (
-    <ConfigsContext.Provider value={configsContext}>
+    <SchemaConfigsContext.Provider value={configsContext}>
       <SchemaProvider
         schema={schema}
         values={formContext.getValues}
@@ -95,8 +97,8 @@ export const ConfigsProvider = ({
       >
         {children}
       </SchemaProvider>
-    </ConfigsContext.Provider>
+    </SchemaConfigsContext.Provider>
   )
 }
 
-export const useConfigs = () => useContext(ConfigsContext)
+export const useSchemaConfigs = () => useContext(SchemaConfigsContext)

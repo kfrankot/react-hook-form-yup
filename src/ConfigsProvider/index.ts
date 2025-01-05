@@ -1,2 +1,9 @@
-export type { Configs, ConfigsProviderProps } from './ConfigsProvider'
-export { ConfigsProvider, useConfigs, ConfigsContext } from './ConfigsProvider'
+export type {
+  SchemaConfigs,
+  SchemaConfigsProviderProps,
+} from './ConfigsProvider'
+export {
+  SchemaConfigsProvider,
+  useSchemaConfigs,
+  SchemaConfigsContext,
+} from './ConfigsProvider'

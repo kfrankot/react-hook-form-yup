@@ -5,7 +5,10 @@ import {
   FieldValues,
 } from 'react-hook-form'
 import { AnyObject, ObjectSchema } from 'yup'
-import { ConfigsProvider, ConfigsProviderProps } from '../ConfigsProvider'
+import {
+  SchemaConfigsProvider,
+  SchemaConfigsProviderProps,
+} from '../ConfigsProvider'
 
 export type FormProviderProps<
   TFieldValues extends FieldValues = FieldValues,
@@ -13,7 +16,7 @@ export type FormProviderProps<
   TTransformedValues extends FieldValues | undefined = undefined,
 > = FormProviderPropsRhf<TFieldValues, TContext, TTransformedValues> & {
   schema: ObjectSchema<TFieldValues, TContext>
-} & Partial<ConfigsProviderProps>
+} & Partial<SchemaConfigsProviderProps>
 
 export const FormProvider = <
   TFieldValues extends FieldValues,
@@ -28,13 +31,13 @@ export const FormProvider = <
 }: FormProviderProps<TFieldValues, TContext, TTransformedValues>) => {
   return (
     <FormProviderRhf {...props}>
-      <ConfigsProvider
+      <SchemaConfigsProvider
         schema={schema}
         schemaSyncMode={schemaSyncMode}
         disableValidateOnSchemaSync={disableValidateOnSchemaSync}
       >
         {children}
-      </ConfigsProvider>
+      </SchemaConfigsProvider>
     </FormProviderRhf>
   )
 }

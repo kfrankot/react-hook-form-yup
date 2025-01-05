@@ -86,7 +86,7 @@ const TestComponent = (props: Omit<Partial<Props>, 'children'>) => {
   )
 }
 
-// TODO: Technically, this is testing useController and useYupController after they were refactored
+// TODO: Technically, this is testing useController and useSchemaController after they were refactored
 // to be allowed to use separately, it should be formally split but the tests are still valid
 describe('useController', () => {
   it('passes schema state to input', () => {

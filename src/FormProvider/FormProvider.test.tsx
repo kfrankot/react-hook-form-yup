@@ -1,7 +1,7 @@
 import React from 'react'
 import { render, screen } from '@testing-library/react'
 import { SchemaProvider } from 'yup-field-props-react'
-import { ConfigsContext } from '../ConfigsProvider'
+import { SchemaConfigsContext } from '../ConfigsProvider'
 import { FormProvider, FormProviderProps } from './FormProvider'
 import * as yup from 'yup'
 import { useForm } from '../useForm'
@@ -17,7 +17,7 @@ describe('FormProvider', () => {
 
   const ChildComponent = () => {
     const { schemaSyncMode, disableValidateOnSchemaSync } =
-      React.useContext(ConfigsContext)
+      React.useContext(SchemaConfigsContext)
     return (
       <div>
         <span data-testid="schema-sync-mode">{schemaSyncMode}</span>

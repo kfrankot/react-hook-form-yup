@@ -7,7 +7,7 @@ import {
   FieldPath,
 } from 'react-hook-form'
 import { SchemaState } from '../types'
-import { SchemaStateDynamic, useYupController } from '../useYupController'
+import { SchemaStateDynamic, useSchemaController } from '../useYupController'
 
 export type UseControllerReturn<
   TFieldValues extends FieldValues = FieldValues,
@@ -42,7 +42,7 @@ export const useController = <
     onChange: onChangeYup,
     onBlur: onBlurYup,
     schemaState,
-  } = useYupController<TFieldValues, TName, TSchema>(name, fieldState)
+  } = useSchemaController<TFieldValues, TName, TSchema>(name, fieldState)
 
   const onChange = useCallback(
     (...event: unknown[]) => {

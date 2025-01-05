@@ -15,7 +15,7 @@ import {
   StringFieldProps,
   useFieldProps,
 } from 'yup-field-props-react'
-import { useConfigs } from '../ConfigsProvider'
+import { useSchemaConfigs } from '../ConfigsProvider'
 import {
   AllSchemaState,
   ArraySchemaState,
@@ -77,7 +77,7 @@ export type SchemaStateDynamic<
   TName extends FieldPath<TFieldValues>,
 > = SchemaStateDynamicByType<FieldPathValue<TFieldValues, TName>>
 
-export type UseYupControllerReturn<
+export type UseSchemaControllerReturn<
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
   TSchema extends SchemaState = SchemaStateDynamic<TFieldValues, TName>,
@@ -85,17 +85,18 @@ export type UseYupControllerReturn<
   schemaState: TSchema
 }
 
-export const useYupController = <
+export const useSchemaController = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
   TSchema extends SchemaState = SchemaStateDynamic<TFieldValues, TName>,
 >(
   name: string,
   fieldState: ControllerFieldState,
-): UseYupControllerReturn<TFieldValues, TName, TSchema> => {
+): UseSchemaControllerReturn<TFieldValues, TName, TSchema> => {
   const schemaState = useFieldProps<TSchema>(name)
 
-  const { schemaSyncMode, disableValidateOnSchemaSync, trigger } = useConfigs()
+  const { schemaSyncMode, disableValidateOnSchemaSync, trigger } =
+    useSchemaConfigs()
 
   const isTouched =
     schemaSyncMode === 'onTouched' ||
