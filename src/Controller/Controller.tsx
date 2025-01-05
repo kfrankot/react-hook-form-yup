@@ -4,11 +4,8 @@ import {
   FieldValues,
   ControllerProps as ControllerPropsRhf,
 } from 'react-hook-form'
-import {
-  useController,
-  UseControllerReturn,
-  SchemaStateDynamic,
-} from '../useController'
+import { useController, UseControllerReturn } from '../useController'
+import { SchemaStateDynamic } from '../useYupController'
 import { SchemaState } from '../types'
 
 export type ControllerProps<

@@ -12,11 +12,10 @@ import { useMemo } from 'react'
 export type UseFormProps<
   TFieldValues extends FieldValues = FieldValues,
   TContext extends AnyObject = AnyObject,
-> = Omit<UseFormPropsRhf<TFieldValues, TContext>, 'resolver' | 'context'> & {
+> = Omit<UseFormPropsRhf<TFieldValues, TContext>, 'resolver'> & {
   schema: ObjectSchema<TFieldValues, TContext>
   schemaOptions?: Parameters<typeof yupResolver<TFieldValues>>[1]
   resolverOptions?: Parameters<typeof yupResolver<TFieldValues>>[2]
-  context?: TContext | (() => TContext)
 }
 
 export type UseFormReturn<
@@ -25,7 +24,6 @@ export type UseFormReturn<
   TTransformedValues extends FieldValues | undefined = undefined,
 > = UseFormReturnRhf<TFieldValues, TContext, TTransformedValues> & {
   schema: ObjectSchema<TFieldValues, TContext>
-  context?: TContext | (() => TContext)
 }
 
 export const useForm = <
@@ -36,7 +34,6 @@ export const useForm = <
   schema,
   schemaOptions,
   resolverOptions,
-  context,
   ...props
 }: UseFormProps<TFieldValues, TContext>): UseFormReturn<
   TFieldValues,
@@ -50,16 +47,14 @@ export const useForm = <
   const form = useFormRhf<TFieldValues, TContext, TTransformedValues>({
     ...props,
     resolver,
-    context: typeof context === 'function' ? context() : context,
   })
 
   return useMemo(
     () => ({
       ...form,
       schema,
-      context,
     }),
     // Need to explicitly include form.formState in deps to account for formState proxy
-    [form, form.formState, schema, context],
+    [form, form.formState, schema],
   )
 }

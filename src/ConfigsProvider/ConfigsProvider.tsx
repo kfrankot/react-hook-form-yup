@@ -2,6 +2,8 @@ import React, { useContext, createContext, useMemo, ReactNode } from 'react'
 import { FieldValues, useFormContext, UseFormTrigger } from 'react-hook-form'
 import { useCallbackRef } from '@radix-ui/react-use-callback-ref'
 import { flatten } from 'flat'
+import { SchemaProvider } from 'yup-field-props-react'
+import { ObjectSchema } from 'yup'
 
 export type Configs = {
   schemaSyncMode: 'onBlur' | 'onChange' | 'onTouched' | 'all' | false
@@ -13,6 +15,7 @@ export type ConfigsProviderProps = Pick<
   Partial<Configs>,
   'schemaSyncMode' | 'disableValidateOnSchemaSync'
 > & {
+  schema: ObjectSchema<any>
   children?: ReactNode
 }
 
@@ -23,11 +26,25 @@ export const ConfigsContext = createContext<Configs>({
 })
 
 export const ConfigsProvider = ({
-  schemaSyncMode = 'onBlur',
-  disableValidateOnSchemaSync = false,
+  schema,
+  schemaSyncMode: schemaSyncModeProp,
+  disableValidateOnSchemaSync: disableValidateOnSchemaSyncProp,
   children,
 }: ConfigsProviderProps) => {
   const formContext = useFormContext()
+  const {
+    formState: { submitCount },
+  } = formContext
+
+  const mode = formContext.control._options.mode
+  const reValidateMode = formContext.control._options.reValidateMode
+  const currentMode =
+    submitCount > 0 ? (reValidateMode ?? 'onChange') : (mode ?? 'onSubmit')
+  // Only force sync of schema state onBlur by default for performance reasons
+  const schemaSyncMode = schemaSyncModeProp ?? 'onBlur'
+  // If only validating on submit, don't bother updating validation to match the schema props, let the submit handle it
+  const disableValidateOnSchemaSync =
+    disableValidateOnSchemaSyncProp ?? currentMode === 'onSubmit'
 
   const trigger = useCallbackRef(() => {
     const validateDirty =
@@ -61,7 +78,7 @@ export const ConfigsProvider = ({
     return formContext.trigger(fieldsToValidate)
   })
 
-  const context = useMemo(
+  const configsContext = useMemo(
     () => ({
       schemaSyncMode,
       disableValidateOnSchemaSync,
@@ -70,8 +87,14 @@ export const ConfigsProvider = ({
     [schemaSyncMode, disableValidateOnSchemaSync, trigger],
   )
   return (
-    <ConfigsContext.Provider value={context}>
-      {children}
+    <ConfigsContext.Provider value={configsContext}>
+      <SchemaProvider
+        schema={schema}
+        values={formContext.getValues}
+        context={formContext.control._options.context}
+      >
+        {children}
+      </SchemaProvider>
     </ConfigsContext.Provider>
   )
 }

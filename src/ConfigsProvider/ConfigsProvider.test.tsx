@@ -1,38 +1,147 @@
-import React from 'react'
+import React, { ReactNode } from 'react'
 import { render, screen, renderHook } from '@testing-library/react'
-import { useFormContext } from 'react-hook-form'
-import { ConfigsProvider, useConfigs, ConfigsContext } from './ConfigsProvider'
+import {
+  FormProvider,
+  FormProviderProps,
+  useForm,
+  useFormContext,
+} from 'react-hook-form'
+import {
+  ConfigsProvider,
+  useConfigs,
+  ConfigsContext,
+  ConfigsProviderProps,
+} from './ConfigsProvider'
+import * as yup from 'yup'
+import { SchemaProvider } from 'yup-field-props-react'
 
 jest.mock('react-hook-form', () => ({
+  ...jest.requireActual('react-hook-form'),
   useFormContext: jest.fn(),
+}))
+
+jest.mock('yup-field-props-react', () => ({
+  SchemaProvider: jest.fn(({ children }) => <div>{children}</div>),
 }))
 
 const mockUseFormContext = useFormContext as jest.Mock
 
+const testSchema = yup.object().shape({
+  name: yup.string().required(),
+})
+
+const ChildComponent = ({ children }: { children: ReactNode }) => {
+  const { schemaSyncMode, disableValidateOnSchemaSync } =
+    React.useContext(ConfigsContext)
+  return (
+    <div>
+      <span data-testid="schema-sync-mode">{schemaSyncMode}</span>
+      <span data-testid="disable-validate-on-schema-sync">
+        {disableValidateOnSchemaSync.toString()}
+      </span>
+      {children}
+    </div>
+  )
+}
+
+const ConfigsProviderWithUseForm = ({
+  schemaSyncMode,
+  disableValidateOnSchemaSync,
+  schema = testSchema,
+  ...props
+}: Partial<FormProviderProps> & Partial<ConfigsProviderProps> = {}) => {
+  const methods = useForm({ mode: 'onSubmit' })
+  return (
+    <FormProvider {...methods} {...props}>
+      <ConfigsProvider
+        schema={schema}
+        schemaSyncMode={schemaSyncMode}
+        disableValidateOnSchemaSync={disableValidateOnSchemaSync}
+      >
+        {<ChildComponent>{props.children}</ChildComponent>}
+      </ConfigsProvider>
+    </FormProvider>
+  )
+}
+
+const defaultUseFormContext = () => ({
+  formState: {
+    touchedFields: {},
+    dirtyFields: {},
+    submitCount: 0,
+  },
+  trigger: jest.fn().mockResolvedValue(true),
+  control: { _options: { mode: 'onSubmit', context: {} } },
+  getValues: () => ({ name: '' }),
+})
+
 describe('ConfigsProvider', () => {
   beforeEach(() => {
+    mockUseFormContext.mockReturnValue(defaultUseFormContext())
+  })
+
+  it('passes correct props to SchemaProvider', () => {
+    const context = defaultUseFormContext()
+    mockUseFormContext.mockReturnValue(context)
+    render(<ConfigsProviderWithUseForm />)
+
+    expect(SchemaProvider).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        schema: testSchema,
+        values: context.getValues,
+      }),
+      {},
+    )
+  })
+
+  it('should set correct defaults for submitCount equal to 0', () => {
     mockUseFormContext.mockReturnValue({
+      ...defaultUseFormContext(),
       formState: {
-        touchedFields: {},
-        dirtyFields: {},
-      },
-      trigger: jest.fn().mockResolvedValue(true),
+        ...defaultUseFormContext().formState,
+        submitCount: 0,
+      } as any,
     })
+    render(<ConfigsProviderWithUseForm />)
+
+    expect(
+      screen.getByTestId('disable-validate-on-schema-sync').textContent,
+    ).toBe('true')
+  })
+
+  it('should set correct defaults for submitCount greater than 0', () => {
+    mockUseFormContext.mockReturnValue({
+      ...defaultUseFormContext(),
+      formState: {
+        ...defaultUseFormContext().formState,
+        submitCount: 1,
+      } as any,
+    })
+    render(<ConfigsProviderWithUseForm />)
+
+    expect(
+      screen.getByTestId('disable-validate-on-schema-sync').textContent,
+    ).toBe('false')
   })
 
   it('provides default context values', () => {
-    render(
-      <ConfigsProvider schemaSyncMode="onBlur">
-        <ConfigsContext.Consumer>
-          {(value) => (
-            <div>
-              <span>{value.schemaSyncMode}</span>
-              <span>{value.disableValidateOnSchemaSync.toString()}</span>
-            </div>
-          )}
-        </ConfigsContext.Consumer>
-      </ConfigsProvider>,
-    )
+    render(<ConfigsProviderWithUseForm />)
+
+    expect(screen.getByText('onBlur')).toBeInTheDocument()
+    expect(screen.getByText('true')).toBeInTheDocument()
+  })
+
+  it('provides default context values when not mode onSubmit', () => {
+    mockUseFormContext.mockReturnValue({
+      ...defaultUseFormContext(),
+      control: {
+        _options: {
+          ...defaultUseFormContext().control._options,
+          mode: 'onBlur',
+        },
+      },
+    })
+    render(<ConfigsProviderWithUseForm />)
 
     expect(screen.getByText('onBlur')).toBeInTheDocument()
     expect(screen.getByText('false')).toBeInTheDocument()
@@ -40,28 +149,20 @@ describe('ConfigsProvider', () => {
 
   it('provides custom context values', () => {
     render(
-      <ConfigsProvider
+      <ConfigsProviderWithUseForm
         schemaSyncMode="onChange"
-        disableValidateOnSchemaSync={true}
-      >
-        <ConfigsContext.Consumer>
-          {(value) => (
-            <div>
-              <span>{value.schemaSyncMode}</span>
-              <span>{value.disableValidateOnSchemaSync.toString()}</span>
-            </div>
-          )}
-        </ConfigsContext.Consumer>
-      </ConfigsProvider>,
+        disableValidateOnSchemaSync={false}
+      />,
     )
 
     expect(screen.getByText('onChange') as HTMLElement).toBeInTheDocument()
-    expect(screen.getByText('true')).toBeInTheDocument()
+    expect(screen.getByText('false')).toBeInTheDocument()
   })
 
   it('trigger function works correctly for onTouched', async () => {
     const triggerMock = jest.fn().mockResolvedValue(true)
     mockUseFormContext.mockReturnValue({
+      ...defaultUseFormContext(),
       formState: {
         touchedFields: { field1: true },
         dirtyFields: { field2: true },
@@ -70,11 +171,11 @@ describe('ConfigsProvider', () => {
     })
 
     render(
-      <ConfigsProvider schemaSyncMode="onTouched">
+      <ConfigsProviderWithUseForm schemaSyncMode="onTouched">
         <ConfigsContext.Consumer>
           {(value) => <button onClick={() => value.trigger()}>Trigger</button>}
         </ConfigsContext.Consumer>
-      </ConfigsProvider>,
+      </ConfigsProviderWithUseForm>,
     )
 
     screen.getByText('Trigger').click()
@@ -84,6 +185,7 @@ describe('ConfigsProvider', () => {
   it('trigger function works correctly for onChange', async () => {
     const triggerMock = jest.fn().mockResolvedValue(true)
     mockUseFormContext.mockReturnValue({
+      ...defaultUseFormContext(),
       formState: {
         touchedFields: { field1: true },
         dirtyFields: { field2: true },
@@ -92,11 +194,11 @@ describe('ConfigsProvider', () => {
     })
 
     render(
-      <ConfigsProvider schemaSyncMode="onChange">
+      <ConfigsProviderWithUseForm schemaSyncMode="onChange">
         <ConfigsContext.Consumer>
           {(value) => <button onClick={() => value.trigger()}>Trigger</button>}
         </ConfigsContext.Consumer>
-      </ConfigsProvider>,
+      </ConfigsProviderWithUseForm>,
     )
 
     screen.getByText('Trigger').click()
@@ -106,6 +208,7 @@ describe('ConfigsProvider', () => {
   it('trigger function works correctly for onBlur', async () => {
     const triggerMock = jest.fn().mockResolvedValue(true)
     mockUseFormContext.mockReturnValue({
+      ...defaultUseFormContext(),
       formState: {
         touchedFields: { field1: true },
         dirtyFields: { field2: true },
@@ -114,11 +217,11 @@ describe('ConfigsProvider', () => {
     })
 
     render(
-      <ConfigsProvider schemaSyncMode="onBlur">
+      <ConfigsProviderWithUseForm schemaSyncMode="onBlur">
         <ConfigsContext.Consumer>
           {(value) => <button onClick={() => value.trigger()}>Trigger</button>}
         </ConfigsContext.Consumer>
-      </ConfigsProvider>,
+      </ConfigsProviderWithUseForm>,
     )
 
     screen.getByText('Trigger').click()
@@ -130,12 +233,12 @@ describe('useConfigs', () => {
   it('returns context values', () => {
     const { result } = renderHook(() => useConfigs(), {
       wrapper: ({ children }) => (
-        <ConfigsProvider
+        <ConfigsProviderWithUseForm
           schemaSyncMode="onTouched"
           disableValidateOnSchemaSync={true}
         >
           {children}
-        </ConfigsProvider>
+        </ConfigsProviderWithUseForm>
       ),
     })
 

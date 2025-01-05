@@ -5,77 +5,9 @@ import {
   UseControllerReturn as UseControllerReturnRhf,
   FieldValues,
   FieldPath,
-  FieldPathValue,
 } from 'react-hook-form'
-import {
-  AllFieldProps,
-  ArrayFieldProps,
-  DateFieldProps,
-  FieldProps,
-  NumberFieldProps,
-  StringFieldProps,
-  useFieldProps,
-} from 'yup-field-props-react'
-import { useConfigs } from '../ConfigsProvider'
-import {
-  AllSchemaState,
-  ArraySchemaState,
-  BooleanSchemaState,
-  DateSchemaState,
-  NumberSchemaState,
-  ObjectSchemaState,
-  SchemaState,
-  StringSchemaState,
-} from '../types'
-
-type IsAny<T> = 0 extends 1 & T ? true : false
-
-export type FieldPropsDynamicByType<T> = (Extract<T, string> extends never
-  ? unknown
-  : StringFieldProps) &
-  (Extract<T, number> extends never ? unknown : NumberFieldProps) &
-  (Extract<T, boolean> extends never ? unknown : FieldProps) &
-  (Extract<T, Date> extends never ? unknown : DateFieldProps) &
-  (T extends Array<infer U>
-    ? ArrayFieldProps<FieldPropsDynamicByType<U>>
-    : unknown) &
-  (T extends Record<string, unknown> ? FieldProps : unknown) &
-  (T extends
-    | string
-    | number
-    | boolean
-    | Date
-    | Array<unknown>
-    | Record<string, unknown>
-    ? unknown
-    : AllFieldProps) &
-  (IsAny<T> extends true ? AllFieldProps : FieldProps)
-
-export type SchemaStateDynamicByType<T> = (Extract<T, string> extends never
-  ? unknown
-  : StringSchemaState) &
-  (Extract<T, number> extends never ? unknown : NumberSchemaState) &
-  (Extract<T, boolean> extends never ? unknown : BooleanSchemaState) &
-  (Extract<T, Date> extends never ? unknown : DateSchemaState) &
-  (T extends Array<infer U>
-    ? ArraySchemaState<FieldPropsDynamicByType<U>>
-    : unknown) &
-  (T extends Record<string, unknown> ? ObjectSchemaState : unknown) &
-  (T extends
-    | string
-    | number
-    | boolean
-    | Date
-    | Array<unknown>
-    | Record<string, unknown>
-    ? unknown
-    : AllSchemaState) &
-  (IsAny<T> extends true ? AllSchemaState : SchemaState)
-
-export type SchemaStateDynamic<
-  TFieldValues extends FieldValues,
-  TName extends FieldPath<TFieldValues>,
-> = SchemaStateDynamicByType<FieldPathValue<TFieldValues, TName>>
+import { SchemaState } from '../types'
+import { SchemaStateDynamic, useYupController } from '../useYupController'
 
 export type UseControllerReturn<
   TFieldValues extends FieldValues = FieldValues,
@@ -102,58 +34,28 @@ export const useController = <
   TName,
   TSchema
 > => {
-  const schemaState = useFieldProps<TSchema>(name)
   const { field, fieldState, formState } = useControllerRhf({
     name,
     ...props,
   })
-
-  const { schemaSyncMode, disableValidateOnSchemaSync, trigger } = useConfigs()
-
-  const isTouched =
-    schemaSyncMode === 'onTouched' ||
-    schemaSyncMode === 'onChange' ||
-    schemaSyncMode === 'all'
-      ? fieldState.isTouched
-      : null
-  const deps = [
-    isTouched,
-    schemaSyncMode,
-    disableValidateOnSchemaSync,
-    trigger,
-    schemaState.forceFormUpdate,
-  ]
+  const {
+    onChange: onChangeYup,
+    onBlur: onBlurYup,
+    schemaState,
+  } = useYupController<TFieldValues, TName, TSchema>(name, fieldState)
 
   const onChange = useCallback(
     (...event: unknown[]) => {
       field.onChange(...event)
-      if (
-        schemaSyncMode === 'onChange' ||
-        schemaSyncMode === 'all' ||
-        (schemaSyncMode === 'onTouched' && isTouched)
-      ) {
-        schemaState.forceFormUpdate()
-        if (!disableValidateOnSchemaSync) {
-          trigger()
-        }
-      }
+      onChangeYup()
     },
-    [field.onChange, ...deps],
+    [field.onChange, onChangeYup],
   )
 
   const onBlur = useCallback(() => {
     field.onBlur()
-    if (
-      schemaSyncMode === 'onBlur' ||
-      schemaSyncMode === 'onTouched' ||
-      schemaSyncMode === 'all'
-    ) {
-      schemaState.forceFormUpdate()
-      if (!disableValidateOnSchemaSync) {
-        trigger()
-      }
-    }
-  }, [field.onBlur, ...deps])
+    onBlurYup()
+  }, [field.onBlur, onBlurYup])
 
   return useMemo(
     () => ({

@@ -86,9 +86,8 @@ const TestComponent = (props: Omit<Partial<Props>, 'children'>) => {
   )
 }
 
-// TODO: These tests are not really complete, because we still need to test validation on a dirty field being triggered, but
-// with the required test, if it started empty, and was filled and unfilled, it goes back to not dirty and doesn't trigger the validation
-
+// TODO: Technically, this is testing useController and useYupController after they were refactored
+// to be allowed to use separately, it should be formally split but the tests are still valid
 describe('useController', () => {
   it('passes schema state to input', () => {
     const { getByTestId } = render(<TestComponent />)

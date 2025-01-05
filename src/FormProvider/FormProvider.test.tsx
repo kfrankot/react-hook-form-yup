@@ -84,20 +84,4 @@ describe('FormProvider', () => {
       {},
     )
   })
-
-  it('should set correct defaults for submitCount equal to 0', () => {
-    render(<FormProviderWithUseForm formState={{ submitCount: 0 } as any} />)
-
-    expect(
-      screen.getByTestId('disable-validate-on-schema-sync').textContent,
-    ).toBe('true')
-  })
-
-  it('should set correct defaults for submitCount greater than 0', () => {
-    render(<FormProviderWithUseForm formState={{ submitCount: 1 } as any} />)
-
-    expect(
-      screen.getByTestId('disable-validate-on-schema-sync').textContent,
-    ).toBe('false')
-  })
 })
