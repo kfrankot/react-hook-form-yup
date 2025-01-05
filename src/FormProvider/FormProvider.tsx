@@ -8,7 +8,7 @@ import { AnyObject, ObjectSchema } from 'yup'
 import {
   SchemaConfigsProvider,
   SchemaConfigsProviderProps,
-} from '../ConfigsProvider'
+} from '../SchemaConfigsProvider'
 
 export type FormProviderProps<
   TFieldValues extends FieldValues = FieldValues,

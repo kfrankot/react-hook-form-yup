@@ -5,7 +5,7 @@ import {
   ControllerProps as ControllerPropsRhf,
 } from 'react-hook-form'
 import { useController, UseControllerReturn } from '../useController'
-import { SchemaStateDynamic } from '../useYupController'
+import { SchemaStateDynamic } from '../useSchemaController'
 import { SchemaState } from '../types'
 
 export type ControllerProps<

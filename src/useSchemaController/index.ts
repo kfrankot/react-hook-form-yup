@@ -1,7 +1,7 @@
-export { useSchemaController } from './useYupController'
+export { useSchemaController } from './useSchemaController'
 export type {
   UseSchemaControllerReturn,
   SchemaStateDynamic,
   SchemaStateDynamicByType,
   FieldPropsDynamicByType,
-} from './useYupController'
+} from './useSchemaController'

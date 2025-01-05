@@ -11,7 +11,7 @@ import {
   useSchemaConfigs,
   SchemaConfigsContext,
   SchemaConfigsProviderProps,
-} from './ConfigsProvider'
+} from './SchemaConfigsProvider'
 import * as yup from 'yup'
 import { SchemaProvider } from 'yup-field-props-react'
 

@@ -15,7 +15,7 @@ import {
   StringFieldProps,
   useFieldProps,
 } from 'yup-field-props-react'
-import { useSchemaConfigs } from '../ConfigsProvider'
+import { useSchemaConfigs } from '../SchemaConfigsProvider'
 import {
   AllSchemaState,
   ArraySchemaState,

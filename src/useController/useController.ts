@@ -7,7 +7,7 @@ import {
   FieldPath,
 } from 'react-hook-form'
 import { SchemaState } from '../types'
-import { SchemaStateDynamic, useSchemaController } from '../useYupController'
+import { SchemaStateDynamic, useSchemaController } from '../useSchemaController'
 
 export type UseControllerReturn<
   TFieldValues extends FieldValues = FieldValues,

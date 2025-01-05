@@ -1,7 +1,7 @@
 import React from 'react'
 import { render, screen } from '@testing-library/react'
 import { SchemaProvider } from 'yup-field-props-react'
-import { SchemaConfigsContext } from '../ConfigsProvider'
+import { SchemaConfigsContext } from '../SchemaConfigsProvider'
 import { FormProvider, FormProviderProps } from './FormProvider'
 import * as yup from 'yup'
 import { useForm } from '../useForm'

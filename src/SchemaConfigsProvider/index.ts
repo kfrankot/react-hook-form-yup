@@ -1,9 +1,9 @@
 export type {
   SchemaConfigs,
   SchemaConfigsProviderProps,
-} from './ConfigsProvider'
+} from './SchemaConfigsProvider'
 export {
   SchemaConfigsProvider,
   useSchemaConfigs,
   SchemaConfigsContext,
-} from './ConfigsProvider'
+} from './SchemaConfigsProvider'
