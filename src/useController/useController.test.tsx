@@ -28,7 +28,7 @@ const TestFormProvider = ({
   schemaSyncMode,
   disableValidateOnSchemaSync,
   mode,
-  defaultValues,
+  defaultValues = { name: '', age: '' },
   ...props
 }: Props) => {
   const methods = useForm({ ...props, schema, mode, defaultValues })
