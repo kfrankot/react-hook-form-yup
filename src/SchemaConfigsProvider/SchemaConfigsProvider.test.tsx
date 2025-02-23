@@ -227,6 +227,30 @@ describe('SchemaConfigsProvider', () => {
     screen.getByText('Trigger').click()
     expect(triggerMock).toHaveBeenLastCalledWith(['field1'])
   })
+
+  it('should trigger when dirtyFields and touchedFields are undefined', async () => {
+    const triggerMock = jest.fn().mockResolvedValue(true)
+    mockUseFormContext.mockReturnValue({
+      ...defaultUseFormContext(),
+      formState: {
+        ...defaultUseFormContext().formState,
+        touchedFields: undefined,
+        dirtyFields: undefined,
+      },
+      trigger: triggerMock,
+    })
+
+    render(
+      <ConfigsProviderWithUseForm schemaSyncMode="onBlur">
+        <SchemaConfigsContext.Consumer>
+          {(value) => <button onClick={() => value.trigger()}>Trigger</button>}
+        </SchemaConfigsContext.Consumer>
+      </ConfigsProviderWithUseForm>,
+    )
+
+    screen.getByText('Trigger').click()
+    expect(triggerMock).toHaveBeenLastCalledWith([])
+  })
 })
 
 describe('useSchemaConfigs', () => {

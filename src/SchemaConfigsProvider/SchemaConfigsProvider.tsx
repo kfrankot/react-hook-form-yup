@@ -68,10 +68,10 @@ export const SchemaConfigsProvider = ({
       return Object.keys(flattened).filter((key) => flattened[key])
     }
     const touchedFields = validateTouched
-      ? getKeyValuesFromFieldMap(formContext.formState.touchedFields)
+      ? getKeyValuesFromFieldMap(formContext.formState.touchedFields ?? {})
       : []
     const dirtyFields = validateDirty
-      ? getKeyValuesFromFieldMap(formContext.formState.dirtyFields)
+      ? getKeyValuesFromFieldMap(formContext.formState.dirtyFields ?? {})
       : []
     const fieldsToValidate =
       !touchedFields.length || !dirtyFields.length
