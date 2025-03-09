@@ -4,19 +4,16 @@ Enhances the integration of `yup` schemas into `react-hook-form`.
 
 ## Description
 
-This library provides the current schema validation rules as properties on `Controller` and `useController`, so that they can easily be displayed in the UI.
+This library provides the current schema validation rules as properties on `Controller` and `useController`, making them easy to display in your UI.
 
-This is managed through the following process:
+How it works:
 
-1. Describe the schema based on the current form values on re-renders using the current form values
-2. Iterate through the schema description to evaluate references
-3. Extract the validation rules as properties rather than a schema definition
-4. Sychronize field validation state and rule properties with conditional schema rules based on the current form values
-5. Map the schema rule properties back to the `useController` hook for use in the UI
+1. Describes the schema based on current form values when components re-render
+2. Evaluates references in the schema description
+3. Extracts validation rules as simple properties and adds them to the `useController` hook
+4. Sychronize field validation state and schema props with conditional schema rules based on the current form values
 
 ## Installation
-
-To install the library:
 
 ```bash
 npm install react-hook-form-yup
@@ -51,8 +48,11 @@ const NumberInput = (props: { name: string; type: string }) => {
   const {
     field,
     fieldState: { error },
+    // schemaState reflects the validation rules for the given field
     schemaState,
   } = useController<any, any, NumberSchemaState>(props.name)
+
+  // Build a placeholder based on the numeric range validations
   const { required, min, max, lessThan, moreThan } = schemaState
   const minMsg = min ? `Min ${min}` : moreThan ? `More than ${moreThan}` : ''
   const maxMsg = max ? `Max ${max}` : lessThan ? `Less than ${lessThan}` : ''
@@ -63,6 +63,7 @@ const NumberInput = (props: { name: string; type: string }) => {
       <input
         {...field}
         style={{ display: 'block', width: 250 }}
+        // Set the required prop based on the schema state
         required={required}
         placeholder={placeholder}
       />
@@ -72,6 +73,7 @@ const NumberInput = (props: { name: string; type: string }) => {
 }
 
 const MyForm = () => {
+  // Pass the schema into useForm, resolver is setup internally
   const props = useForm({ schema })
 
   return (
@@ -87,15 +89,15 @@ export default MyForm
 
 ### Controller component
 
-The `Controller` component has been updated in the same way as the `useController` hook, with `schemaState` being included in the `render` function
+The `Controller` component has been enhanced with the same `schemaState` property that's available in the `useController` hook.
 
 ## Customization
 
-This library will try to keep the schema state and form validation aligned with the given form values. By default, the schema state for all fields will be updated on blur, so any refs or conditional validations can be shown in the UI. Additionally, unless the current validation mode is `onSubmit`, any field that had been previously qualified for validation will be revalidated to align with the schema state (dirty fields for `onChange`, touched fields for `onBlur`, both for `onTouched`). These behaviors can be overridden though.
+This library keeps schema state and form validation aligned with form values. By default, the schema state updates on blur, allowing evaluated refs and conditional validations to display in the UI. The library also revalidates fields when needed based on the current validation mode. You can customize these behaviors:
 
 ### Schema sync mode
 
-Set `schemaSyncMode` to change when the schema is synced with the form values. Can be `onBlur`, `onTouched`, `onChange`, `all`, or `false` to disable. Default is `onBlur` and is recommended for optimal performance.
+Set when the schema props sync with form values. Options: `onBlur` (default), `onTouched`, `onChange`, `all`, or `false` (to disable)
 
 ```tsx
 <FormProvider schemaSyncMode="onChange" {...props} />
@@ -111,11 +113,11 @@ Set `disableValidateOnSchemaSync` to disable validation from occuring on schema 
 
 ## Advanced usage
 
-While this library provides overrides of `useForm`, `useController`, and `FormProvider` from the `react-hook-form` library, these could create too tight of a binding between `react-hook-form` and `react-hook-form-yup` for advanced use cases. For more complext setups, you can alternatively utilize the `SchemaConfigsProvider` component and `useSchemaController` hook, which are used internally the `FormProvider` and `useController` hooks.
+While this library provides overrides of `useForm`, `useController`, and `FormProvider` from the `react-hook-form` library, these could create too tight of a binding between `react-hook-form` and `react-hook-form-yup` for advanced use cases. For more complex setups, you can alternatively utilize the `SchemaConfigsProvider` component and `useSchemaController` hook, which are used internally by the `FormProvider` and `useController` hooks.
 
 ### Form setup
 
-The below example is functionaly equivalent to the previous form setup example. It is a bit more complex and easier to misconfigure, but offers some additional flexibility.
+The below example is functionaly equivalent to the previous form setup example. The setup is a bit more complex, but offers greater flexibility.
 
 ```tsx
 import React from 'react'
@@ -128,6 +130,8 @@ const NumberInput = (props: { name: string; type: string }) => {
   const { field, fieldState } = useController<any, any, NumberSchemaState>(
     props.name,
   )
+
+  // Get only the schema props, separately from useController
   const { schemaState, ...schemaProps } = useSchemaController<
     any,
     any,
@@ -140,10 +144,12 @@ const NumberInput = (props: { name: string; type: string }) => {
 
   const onChange = (event) => {
     field.onChange(event)
+    // Call onChange for the schema props on react-hook-form-yup separately
     schemaProps.onChange()
   }
   const onBlur = (event) => {
     field.onBlur(event)
+    // Call onBlur for the schema props on react-hook-form-yup separately
     schemaProps.onBlur()
   }
 
@@ -170,6 +176,7 @@ const MyForm = () => {
 
   return (
     <FormProvider {...props}>
+      {/* Set react-hook-form-yup provider props on SchemaConfigsProvider instead of useForm and FormProvider */}
       <SchemaConfigsProvider
         schema={schema}
         schemaSyncMode="onBlur"
@@ -184,3 +191,7 @@ const MyForm = () => {
 
 export default MyForm
 ```
+
+## Limitations
+
+Currently, this only works when using a `FormProvider`, and does not have support for `register` based forms. It also only works with synchronous schema.

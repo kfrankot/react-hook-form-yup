@@ -1,6 +1,6 @@
 {
   "name": "react-hook-form-yup",
-  "version": "1.0.0-alpha.7",
+  "version": "1.0.0",
   "description": "Enhances the integration of yup schemas into react-hook-form",
   "files": [
     "dist/"
@@ -58,7 +58,6 @@
     "@babel/preset-env": "^7.24.7",
     "@babel/preset-react": "^7.24.7",
     "@babel/preset-typescript": "^7.24.7",
-    "@mui/material": "^5.16.7",
     "@rollup/plugin-babel": "^6.0.4",
     "@rollup/plugin-commonjs": "^26.0.1",
     "@rollup/plugin-node-resolve": "^15.2.3",
@@ -91,7 +90,7 @@
   "dependencies": {
     "@radix-ui/react-use-callback-ref": "^1.1.0",
     "flat": "^5.0.2",
-    "yup-field-props-react": "1.0.0-beta.5",
+    "yup-field-props-react": "^1.0.0",
     "@hookform/resolvers": "^3.9.0"
   },
   "peerDependencies": {
